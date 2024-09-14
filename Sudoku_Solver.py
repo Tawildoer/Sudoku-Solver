@@ -1,45 +1,56 @@
 import tkinter as tk
 import numpy as np
+import time
 from tkinter import messagebox
 
+
 def vertical(grid, col, val):
-    for i in range(0, 8):
-        if grid[i, col] == val:
+    # Inputs: the Sudoku, the column to check and the value to check for
+    # Outputs: True if the value exists in the column, False if the value does not
+    for i in range(0, 9):
+        if grid[i][col] == val:
             return True
     return False
 
 def horizontal(grid, row, val):
-    for i in range(0, 8):
-        if grid[row, i] == val:
+    # Inputs: the Sudoku, the row to check and the value to check for
+    # Outputs: True if the value exists in the row, False if the value does not
+    for i in range(0, 9):
+        if grid[row][i] == val:
             return True
     return False
 
 def group(grid, row, col, val):
-    row_box = row % 3
-    col_box = col % 3
-    for i in range(0, 2):
-        for j in range(0, 2):
-            if grid[3*row_box + i, 3*col_box + j] == val:
+    # Inputs: the Sudoku, the square to check and the value to check for
+    # Outputs: True if the value exists in the square, False if the value does not
+    row_box = row//3
+    col_box = col//3
+    for i in range(0, 3):
+        for j in range(0, 3):
+            if grid[3*row_box + i][3*col_box + j] == val:
                 return True
     return False
 
 def solve_sudoku(grid):
     grid = np.array(grid)
-    for row in range(0, 8):
-        for col in range(0, 8):
-            if grid[row, col] == 0:
-                count = 0
-                val = 0
-                for i in range(0, 8):
-                    if horizontal(grid, row, i) == False and vertical(grid, col, i) == False and group(grid, row, col, i) == False:
-                        count += 1
-                        val = i
-                if count == 1:
-                    grid[row, col] = val
+    val_added = True
+    while val_added:
+        val_added = False
+        for row in range(0, 9):
+            for col in range(0, 9):
+                if grid[row][col] == 0:
+                    count = 0
+                    val = 0
+                    for i in range(1, 10):
+                        if horizontal(grid, row, i) == False and vertical(grid, col, i) == False and group(grid, row, col, i) == False:
+                            count += 1
+                            val = i
+                    if count == 1:
+                        grid[row][col] = val
+                        val_added = True
     return grid
     
         
-            
 
 # Function to get values from the GUI and solve the Sudoku
 def solve_puzzle():
@@ -58,8 +69,9 @@ def solve_puzzle():
         
         # Call your solving function here
         solution = solve_sudoku(grid)
-
-        if solution:
+        zeros_in = np.any(solution == 0)
+        solution = solution.tolist()
+        if not zeros_in:
             # Display the solution in the GUI
             for row in range(9):
                 for col in range(9):
@@ -71,7 +83,7 @@ def solve_puzzle():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-# Create the main window
+#Create the main window
 root = tk.Tk()
 root.title("Sudoku Solver")
 
@@ -91,3 +103,13 @@ solve_button.grid(row=9, column=0, columnspan=9)
 
 # Start the GUI loop
 root.mainloop()
+
+grid = np.array([[8, 0, 0, 0, 0, 5, 0, 0, 0],
+                 [0, 7, 0, 9, 0, 0, 0, 4, 0],
+                 [0, 0, 9, 0, 7, 8, 3, 2, 5], 
+                 [3, 0, 1, 0, 9, 0, 0, 5, 0],
+                 [0, 0, 6, 0, 0, 0, 1, 0, 0],
+                 [0, 9, 0, 0, 3, 0, 6, 0, 2],
+                 [2, 8, 3, 6, 5, 0, 7, 0, 0],
+                 [0, 1, 0, 0, 0, 2, 0, 8, 0],
+                 [0, 0, 0, 1, 0, 0, 0, 0, 9]])
